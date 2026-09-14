@@ -11,8 +11,8 @@ pipeline {
 
   environment {
     GITURL="https://github.com/daticalamy"
-    GIT_SQL_REPO="secure-ny-sql"
-    PROJ_SQL="secure-ny-sql"
+    GIT_SQL_REPO="secure-ny-dbchange-sql"
+    PROJ_SQL="secure-ny-dbchange-sql"
 	     
     BRANCH="${params.ref}".substring("${params.ref}".lastIndexOf("/") + 1) 
     REPOSITORY_BASE="<base_dir>"
@@ -25,7 +25,7 @@ pipeline {
     LIQUIBASE_LICENSE_KEY = credentials('LIQUIBASE_LICENSE_KEY')
     LIQUIBASE_SEARCH_PATH="checks, flows, sql"
     LIQUIBASE_COMMAND_CHANGELOG_FILE="db.changelog-main.yaml"
-    LIQUIBASE_COMMAND_URL="jdbc:db2://db2-luw.liquibase.net:50000/GDITREF5"
+    LIQUIBASE_COMMAND_URL="jdbc:db2://db2-luw.liquibase.net:50000/GDITREF1"
     LIQUIBASE_LIQUIBASE_SCHEMA_NAME="SECURE_TRACKING"
     LIQUIBASE_COMMAND_DEFAULT_SCHEMA_NAME="NYHBEODB_929"
 
