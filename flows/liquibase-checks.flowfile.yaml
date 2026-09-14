@@ -1,0 +1,14 @@
+##########           LIQUIBASE FLOWFILE                ##########
+##########  learn more http://docs.liquibase.com/flow  ##########
+
+globalVariables:
+  ENV: ${ENVIRONMENT}
+
+stages:
+
+  Checks-Changelog:
+    actions:
+      - type: liquibase
+        command: checks run
+        cmdArgs: {checks-scope: changelog, context-filter: "${ENV}", changeset-filter: "PENDING"}
+        globalArgs: { reports-name: "checks-report.html" }

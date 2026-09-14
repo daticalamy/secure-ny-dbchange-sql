@@ -1,0 +1,42 @@
+databaseChangeLog:
+
+  - includeAll:
+      path: tablespaces
+      relativeToChangelogFile: true
+      errorIfMissingOrEmpty: false
+
+  - includeAll:
+      path: ddl
+      relativeToChangelogFile: true
+      errorIfMissingOrEmpty: false
+
+  - includeAll:
+      path: view
+      relativeToChangelogFile: true
+      errorIfMissingOrEmpty: false
+
+  - includeAll:
+      path: function
+      relativeToChangelogFile: true
+      errorIfMissingOrEmpty: false
+
+  - includeAll:
+      path: procedure
+      relativeToChangelogFile: true
+      errorIfMissingOrEmpty: false
+
+  - includeAll:
+      path: trigger
+      relativeToChangelogFile: true
+      errorIfMissingOrEmpty: false
+
+  - includeAll:
+      path: sql_direct
+      relativeToChangelogFile: true
+      errorIfMissingOrEmpty: false
+      
+  - includeAll:
+      path: data_dml
+      relativeToChangelogFile: true
+      errorIfMissingOrEmpty: false
+      

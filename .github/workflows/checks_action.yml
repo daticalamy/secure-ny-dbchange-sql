@@ -1,0 +1,125 @@
+#############################################################################
+#  GitHub Action to run checks on the first database, eg. DEV,
+#  using Liquibase Secure, Flows, Policy checks, and other services.
+##############################################################################
+name: 'Liquibase Secure Policy Checks'
+run-name: ${{ inputs.environment}} policy checks of current repo by ${{ github.actor }}
+
+on:
+  push:
+    paths:
+      - 'sql/**'
+      - 'db.changelog-main.yaml'
+  pull_request:
+    paths:
+      - 'sql/**'
+      - 'db.changelog-main.yaml'
+
+  workflow_dispatch:
+    # Following are the inputs received via the GitHubActions Run workflow dialog
+    inputs:
+    
+      # The type 'environment' will automatically pull in the environments created in GitHub
+      environment:
+        description: 'Environment for build'
+        type: environment
+        required: true
+        default: REF
+
+####################################################################
+#  Set up the environment
+#####################################################################
+env:
+  # Secure License key
+  LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
+  
+  # JDBC URL of the database per environment
+  # See https://docs.liquibase.com/workflows/liquibase-community/using-jdbc-url-in-liquibase.html
+  LIQUIBASE_COMMAND_URL: ${{ vars.LIQUIBASE_COMMAND_URL }}
+
+  # Credentials for the environment's database https://docs.liquibase.com/parameters/command-parameters.html
+  LIQUIBASE_COMMAND_USERNAME: ${{ secrets.LIQUIBASE_COMMAND_USERNAME }}
+  LIQUIBASE_COMMAND_PASSWORD: ${{ secrets.LIQUIBASE_COMMAND_PASSWORD }}
+
+  # Liquibase schema: Specified to allow flexibility in storage of Liquibase Change Tracking Tables
+  # See https://docs.liquibase.com/parameters/liquibase-schema-name.html
+  LIQUIBASE_LIQUIBASE_SCHEMA_NAME: SECURE_TRACKING
+  
+  # Default schema: Specify schema for all changes
+  LIQUIBASE_COMMAND_DEFAULT_SCHEMA_NAME: ${{ vars.LIQUIBASE_DEFAULT_SCHEMA }}
+
+  # Search path (See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html)
+  LIQUIBASE_SEARCH_PATH: checks,flows,sql
+  
+  # The database changelog. See https://docs.liquibase.com/concepts/changelogs/working-with-changelogs.html
+  LIQUIBASE_COMMAND_CHANGELOG_FILE: db.changelog-main.yaml
+  
+  ENVIRONMENT: ${{ inputs.environment }}
+
+  # Reports
+  LIQUIBASE_REPORT_PATH: reports
+  
+  # Values: OFF, SEVERE, WARNING, INFO, FINE
+  LIQUIBASE_LOG_LEVEL: INFO
+  LIQUIBASE_LOG_FORMAT: JSON_PRETTY
+  LIQUIBASE_LOG_FILE: logs/log.json
+
+  # History table
+  LIQUIBASE_DBCLHISTORY_ENABLED: true
+  
+  # Checks 
+  LIQUIBASE_COMMAND_CHECKS_RUN_CHECKS_SCRIPTS_ENABLED: true
+  LIQUIBASE_COMMAND_CHECKS_RUN_AUTO_UPDATE: off
+
+jobs:
+  #########################################################################
+  #  Build
+  #########################################################################
+
+  policy-checks:
+    runs-on: [self-hosted]
+    environment: ${{ inputs.environment }}
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Liquibase Environment
+      uses: ./.github/workflows/setup-liquibase
+
+    - name: Liquibase Checks Flow
+      run: liquibase flow --flow-file=liquibase-checks.flowfile.yaml
+
+    - name: Upload Reports Artifact
+      if: always()
+      uses: ./.github/workflows/upload-reports
+      with:
+        job-type: checks
+        upload-other: false
+
+  trigger-jenkins:
+    needs: policy-checks
+    runs-on: [self-hosted]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract work item from commit message
+        id: workitem
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "message=${COMMIT_MSG}" >> "$GITHUB_OUTPUT"
+
+      - name: Get Jenkins CSRF crumb
+        id: crumb
+        run: |
+          CRUMB_JSON=$(curl -s -u "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_API_TOKEN }}" \
+            "${{ secrets.JENKINS_URL }}/crumbIssuer/api/json")
+          echo "crumb=$(echo "$CRUMB_JSON" | jq -r '.crumb')" >> "$GITHUB_OUTPUT"
+          echo "field=$(echo "$CRUMB_JSON" | jq -r '.crumbRequestField')" >> "$GITHUB_OUTPUT"
+
+      - name: Trigger Jenkins build
+        run: |
+          curl -s -X POST \
+            -u "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_API_TOKEN }}" \
+            -H "${{ steps.crumb.outputs.field }}: ${{ steps.crumb.outputs.crumb }}" \
+            "${{ secrets.JENKINS_URL }}/job/Secure/job/DB2%20LUW/job/Build_DataCorrections/buildWithParameters" \
+            --data-urlencode "ref=${{ github.ref }}" \
+            --data-urlencode "work_item=${{ steps.workitem.outputs.message }}"

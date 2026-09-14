@@ -1,0 +1,48 @@
+##########           LIQUIBASE FLOWFILE                ##########
+##########  learn more http://docs.liquibase.com/flow  ##########
+
+globalVariables:
+  WORK_ITEM: ${WORK_ITEM:-null}
+  ENV: ${ENVIRONMENT}
+
+stages:
+          
+  Validation:
+    actions: 
+      - type: liquibase
+        command: validate
+
+  Checks-Changelog:
+    actions:
+      - type: liquibase
+        command: checks run
+        cmdArgs: {checks-scope: changelog, context-filter: "${ENV}"}
+        globalArgs: { reports-name: "checks-report-deploy-${ENV}-changelog.html" }
+
+  Status:
+    actions:
+      - type: liquibase
+        command: status
+        cmdArgs: {verbose: true, context-filter: "${ENV}"}
+
+  Update-SQL:
+    actions:
+      - type: liquibase
+        command: update-sql
+        cmdArgs: {context-filter: "${ENV}", reports-name: "deploy-dryrun-${ENV}.html"}
+
+  Update:
+    actions:
+      - type: liquibase
+        command: update
+        cmdArgs: {context-filter: "${ENV}"}
+        globalArgs: { reports-name: "deploy-report-${ENV}.html" }
+
+## The endStage ALWAYS RUNS. 
+## So put actions here which you desire to perform whether previous stages' actions succeed or fail.
+## If you do not want any actions to ALWAYS RUN, simply delete the endStage from your flow file.
+
+endStage:
+  actions:
+    - type: liquibase
+      command: history
