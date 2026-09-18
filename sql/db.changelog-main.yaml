@@ -39,4 +39,8 @@ databaseChangeLog:
       path: data_dml
       relativeToChangelogFile: true
       errorIfMissingOrEmpty: false
-      
+
+  - includeAll:
+      path: grants
+      relativeToChangelogFile: true
+      errorIfMissingOrEmpty: false      
