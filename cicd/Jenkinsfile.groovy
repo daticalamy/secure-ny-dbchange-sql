@@ -41,7 +41,7 @@ pipeline {
     JAVA_OPTS = "-Djavax.net.ssl.trustStore=/opt/liquibase/certs/truststore.jks -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASS}"
 
     LIQUIBASE_INSIGHTS_ENABLED=true
-    LIQUIBASE_INSIGHTS_API_URL=https://cs-ci.liquibase.net/api/operations/ingest
+    LIQUIBASE_INSIGHTS_API_URL="https://cs-ci.liquibase.net/api/operations/ingest"
     LIQUIBASE_INSIGHTS_AUTH_TOKEN=credentials('CS-CI_AuthToken')
     LIQUIBASE_INSIGHTS_CHANGELOG_IDENTIFIER=changelog-twelve-chefs
     LIQUIBASE_INSIGHTS_CONNECTION_IDENTIFIER=conn-legal-pumas
