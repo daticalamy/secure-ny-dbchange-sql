@@ -37,6 +37,10 @@ pipeline {
     LIQUIBASE_REPORTS_PATH="reports"
     LIQUIBASE_COMMAND_CHECKS_RUN_AUTO_UPDATE="false"
 
+    TRUSTSTORE_PASS = credentials('CS-CI_TrustStore')
+    JAVA_OPTS = "-Djavax.net.ssl.trustStore=/opt/liquibase/certs/truststore.jks -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASS}"
+}
+
   }
 	
   stages {

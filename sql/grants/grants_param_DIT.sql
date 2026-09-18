@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset asmith:dit_grants labels:"WI 123456" context:DEV endDelimiter:@
+--changeset asmith:dit_grants labels:"WI 123456" context:DEV endDelimiter:@ runAlways:true
 BEGIN
   DECLARE v_delete_stmt VARCHAR(200);
   DECLARE v_insert_stmt VARCHAR(200);
