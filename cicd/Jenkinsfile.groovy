@@ -43,8 +43,8 @@ pipeline {
     LIQUIBASE_INSIGHTS_ENABLED=true
     LIQUIBASE_INSIGHTS_API_URL="https://cs-ci.liquibase.net/api/operations/ingest"
     LIQUIBASE_INSIGHTS_AUTH_TOKEN=credentials('CS-CI_AuthToken')
-    LIQUIBASE_INSIGHTS_CHANGELOG_IDENTIFIER=changelog-twelve-chefs
-    LIQUIBASE_INSIGHTS_CONNECTION_IDENTIFIER=conn-legal-pumas
+    LIQUIBASE_INSIGHTS_CHANGELOG_IDENTIFIER="changelog-twelve-chefs"
+    LIQUIBASE_INSIGHTS_CONNECTION_IDENTIFIER="conn-legal-pumas"
 
   }
 	
