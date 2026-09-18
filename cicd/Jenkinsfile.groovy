@@ -39,7 +39,6 @@ pipeline {
 
     TRUSTSTORE_PASS = credentials('CS-CI_TrustStore')
     JAVA_OPTS = "-Djavax.net.ssl.trustStore=/opt/liquibase/certs/truststore.jks -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASS}"
-}
 
   }
 	
